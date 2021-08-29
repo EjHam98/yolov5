@@ -249,10 +249,9 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
-                    if save_txt:  # Write to file
-                        detcls.append(torch.tensor(cls).view(-1).tolist()[0])
-                        detxywh.append((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())
-                        detconf.append(torch.tensor(conf).view(-1).tolist()[0])
+                    detcls.append(torch.tensor(cls).view(-1).tolist()[0])
+                    detxywh.append((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())
+                    detconf.append(torch.tensor(conf).view(-1).tolist()[0])
 
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
