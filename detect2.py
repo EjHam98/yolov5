@@ -37,7 +37,7 @@ class trackedObject:
         self.conf = conf
         self.centroid = centroidof(xywh)
 
-def centroidof(xwyh):
+def centroidof(xywh):
     return [xywh[0] + (xywh[2] / 2), xywh[1] + (xywh[3] / 2)]
 
 def euclid(p1, p2):
@@ -47,17 +47,19 @@ def customtracker(cl, xw, conf):
     global num_tracked, list_tracked
     for k in range(3):
         for i in range(len(list_tracked[k])):
-            k = -1
+            q = -1
             mindis = 10e8
             for j in range(len(xw)):
-                if cl[j] == list_tracked[k].cls and mindis >= euclid(centroidof(xw[i]), list_tracked[k][i].centroid):
-                    mindis = euclid(centroidof(xw[i]), list_tracked[k][i].centroid)
-                    k = j
-            list_tracked[k][i].xwyh = xw[k]
-            list_tracked[k][i].conf = conf[k]
-            cl = cl[:k] + cl[k+1:]
-            xw = xw[:k] + xw[k+1:]
-            conf = conf[:k] + conf[k+1:]
+                if cl[j] == list_tracked[k][i].cls and mindis >= euclid(centroidof(xw[j]), list_tracked[k][i].centroid):
+                    mindis = euclid(centroidof(xw[j]), list_tracked[k][i].centroid)
+                    q = j
+            if q == -1:
+              continue
+            list_tracked[k][i].xwyh = xw[q]
+            list_tracked[k][i].conf = conf[q]
+            cl = cl[:q] + cl[q+1:]
+            xw = xw[:q] + xw[q+1:]
+            conf = conf[:q] + conf[q+1:]
     for i in range(len(xw)):
         if cl[i] == 0:
             list_tracked[0].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
