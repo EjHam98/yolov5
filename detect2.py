@@ -30,7 +30,7 @@ list_tracked = [[], [], []]
 num_tracked = 0
 
 class trackedObject:
-    def __init__(oid, cls, xywh, conf):
+    def __init__(self, oid, cls, xywh, conf):
         self.oid = oid
         self.cls = cls
         self.xywh = xywh
@@ -44,18 +44,7 @@ def euclid(p1, p2):
     return (p2[0] - p1[0])**2 + (p2[1] - p1[1])**2
 
 def customtracker(cl, xw, conf):
-"""    for i in range(len(xw)):
-        if cl[i] == 0:
-            if len(list_tracked[0]) == 0:
-                list_tracked[0].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
-                num_tracked += 1
-            else:
-                k = -1
-                mindis = 10e8
-                for j in range(len(list_tracked[0])):
-                    if mindis >= euclid(centroidof(xw[i]), list_tracked[0][j].centroid):
-                        mindis = euclid(centroidof(xw[i]), list_tracked[0][j].centroid)
-                        k = j"""
+    global num_tracked, list_tracked
     for k in range(3):
         for i in range(len(list_tracked[k])):
             k = -1
@@ -79,6 +68,19 @@ def customtracker(cl, xw, conf):
         if cl[i] == 28:
             list_tracked[2].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
             num_tracked += 1
+"""    for i in range(len(xw)):
+        if cl[i] == 0:
+            if len(list_tracked[0]) == 0:
+                list_tracked[0].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
+                num_tracked += 1
+            else:
+                k = -1
+                mindis = 10e8
+                for j in range(len(list_tracked[0])):
+                    if mindis >= euclid(centroidof(xw[i]), list_tracked[0][j].centroid):
+                        mindis = euclid(centroidof(xw[i]), list_tracked[0][j].centroid)
+                        k = j
+"""
 
 @torch.no_grad()
 def run(weights='yolov5s.pt',  # model.pt path(s)
@@ -187,6 +189,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
         detcls = []
         detxywh = []
         detconf = []
+
+        print(num_tracked)
 
         # Inference
         t1 = time_sync()
