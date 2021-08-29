@@ -44,7 +44,7 @@ def euclid(p1, p2):
     return (p2[0] - p1[0])**2 + (p2[1] - p1[1])**2
 
 def customtracker(cl, xw, conf):
-    for i in range(len(xw)):
+"""    for i in range(len(xw)):
         if cl[i] == 0:
             if len(list_tracked[0]) == 0:
                 list_tracked[0].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
@@ -55,7 +55,30 @@ def customtracker(cl, xw, conf):
                 for j in range(len(list_tracked[0])):
                     if mindis >= euclid(centroidof(xw[i]), list_tracked[0][j].centroid):
                         mindis = euclid(centroidof(xw[i]), list_tracked[0][j].centroid)
-                        k = j
+                        k = j"""
+    for k in range(3):
+        for i in range(len(list_tracked[k])):
+            k = -1
+            mindis = 10e8
+            for j in range(len(xw)):
+                if cl[j] == list_tracked[k].cls and mindis >= euclid(centroidof(xw[i]), list_tracked[k][i].centroid):
+                    mindis = euclid(centroidof(xw[i]), list_tracked[k][i].centroid)
+                    k = j
+            list_tracked[k][i].xwyh = xw[k]
+            list_tracked[k][i].conf = conf[k]
+            cl = cl[:k] + cl[k+1:]
+            xw = xw[:k] + xw[k+1:]
+            conf = conf[:k] + conf[k+1:]
+    for i in range(len(xw)):
+        if cl[i] == 0:
+            list_tracked[0].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
+            num_tracked += 1
+        if cl[i] == 24:
+            list_tracked[1].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
+            num_tracked += 1
+        if cl[i] == 28:
+            list_tracked[2].append(trackedObject(num_tracked, cl[i], xw[i], conf[i]))
+            num_tracked += 1
 
 @torch.no_grad()
 def run(weights='yolov5s.pt',  # model.pt path(s)
