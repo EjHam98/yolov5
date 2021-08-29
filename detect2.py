@@ -259,13 +259,24 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                     detxywh.append((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())
                     detconf.append(torch.tensor(conf).view(-1).tolist()[0])
 
-                    if save_img or save_crop or view_img:  # Add bbox to image
+                    """if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                         im0 = plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_width=line_thickness)
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
+                    """
                 customtracker(detcls, detxywh, detconf)
+
+                for *xyxy, conf, cls in reversed(det):
+                    label = None
+                    for kq in range(3):
+                        for iq in range(len(list_tracked[kq])):
+                            if list_tracked[kq][iq].xywh == ((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()):
+                                label = str(list_tracked[kq][iq].oid) + "-" + names[int(list_tracked[kq][iq].cls)]
+                                break
+                    c = int(cls)
+                    im0 = plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_width=line_thickness)
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
