@@ -37,6 +37,9 @@ class trackedObject:
         self.conf = conf
         self.centroid = centroidof(xywh)
 
+def floatequal(x, y):
+  return abs(x - y) <= 0.0001
+
 def centroidof(xywh):
     return [xywh[0] + (xywh[2] / 2), xywh[1] + (xywh[3] / 2)]
 
@@ -267,12 +270,16 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                             save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
                     """
                 customtracker(detcls, detxywh, detconf)
-
+                tmpboo = False
                 for *xyxy, conf, cls in reversed(det):
                     label = None
                     for kq in range(3):
                         for iq in range(len(list_tracked[kq])):
-                            if list_tracked[kq][iq].xywh == ((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()):
+                            for ju in range(4):
+                                if not floatequal(list_tracked[kq][iq].xywh[ju],((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())[ju]):
+                                    tmpboo = True
+                                    break
+                            if not tmpboo:
                                 label = str(list_tracked[kq][iq].oid) + "-" + names[int(list_tracked[kq][iq].cls)]
                                 break
                     c = int(cls)
