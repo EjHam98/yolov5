@@ -10,7 +10,7 @@ import argparse
 import sys
 import time
 from pathlib import Path
-
+import tensorflow as tf
 import cv2
 import numpy as np
 import torch
@@ -261,6 +261,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                     detcls.append(torch.tensor(cls).view(-1).tolist()[0])
                     detxywh.append((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())
                     detconf.append(torch.tensor(conf).view(-1).tolist()[0])
+                    #print("What xyxy is like: ", gn)
+
 
                     """if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
@@ -270,11 +272,40 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                             save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
                     """
                 customtracker(detcls, detxywh, detconf)
-                tmpboo = False
+                for *xyxy, conf, cls in reversed(det):
+                    tmpboo = 10e8
+                    tmpind1 = -1
+                    tmpind2 = -1
+                    label = None
+                    kq = -1
+                    if int(cls) == 0:
+                        kq = 0
+                    elif int(cls) == 24:
+                        kq = 1
+                    else:
+                        kq = 2
+                    for iq in range(len(list_tracked[kq])):
+                        tmpsum = 0
+                        for ju in range(2):
+                            tmpsum += (list_tracked[kq][iq].xywh[ju] - ((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())[ju])**2
+                        #print(kq, iq, ": ", tmpboo, tmpsum)
+                        if tmpsum <= tmpboo:
+                            tmpboo = tmpsum
+                            tmpind1 = kq
+                            tmpind2 = iq
+                    if tmpind1 == -1 or tmpind2 == -1:
+                        label = None
+                    else:
+                        label = str(list_tracked[tmpind1][tmpind2].oid) + "-" + names[int(list_tracked[tmpind1][tmpind2].cls)]
+                    #print(label)
+                    c = int(cls)
+                    im0 = plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_width=line_thickness)
+                """tmpboo = False
                 for *xyxy, conf, cls in reversed(det):
                     label = None
                     for kq in range(3):
                         for iq in range(len(list_tracked[kq])):
+                            print("TX:",list_tracked[kq][iq].xywh,"RTX:",((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()))
                             for ju in range(4):
                                 if not floatequal(list_tracked[kq][iq].xywh[ju],((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())[ju]):
                                     tmpboo = True
@@ -284,6 +315,7 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                                 break
                     c = int(cls)
                     im0 = plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_width=line_thickness)
+                """
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
