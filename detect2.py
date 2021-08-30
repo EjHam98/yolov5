@@ -258,6 +258,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
+                    bbtuple = torch.tensor(xyxy).view(-1).tolist()
+                    centroid(bbtuple)
                     detcls.append(torch.tensor(cls).view(-1).tolist()[0])
                     detxywh.append((xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist())
                     detconf.append(torch.tensor(conf).view(-1).tolist()[0])
